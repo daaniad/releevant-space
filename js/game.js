@@ -42,5 +42,33 @@ function create() {
  */
 function update() {
   if (cursors.left.isDown) {
+    let a = player.x - PLAYER_VELOCITY;
+    if (a < (player.width/2) * PLAYER_SCALE) {
+      a = player.width /2 *PLAYER_SCALE;
+    }
+    player.setX(a);
+  }
+  else if (cursors.right.isDown) {
+    let a = player.x + PLAYER_VELOCITY;
+    if (a > SCREEN_WIDTH - (player.width / 2) * PLAYER_SCALE) {
+      a = SCREEN_WIDTH- player.width / 2 * PLAYER_SCALE;
+    }
+    player.setX(a)
+  }
+
+  if (cursors.up.isDown) {
+    let a = player.y - PLAYER_VELOCITY;
+    if (a < (player.height / 2)* PLAYER_SCALE) {
+      a = player.height / 2 * PLAYER_SCALE;
+    }
+    player.setY(a)
+  }
+  else if (cursors.down.isDown) {
+    let PLAYER_VELOCITY2 = PLAYER_VELOCITY*2;
+    let a = player.y + PLAYER_VELOCITY2;
+    if (a > SCREEN_HEIGHT - (player.height / 2)* PLAYER_SCALE) {
+      a = SCREEN_HEIGHT - player.height / 2 * PLAYER_SCALE;
+    }
+    player.setY(a)
   }
 }
