@@ -1,9 +1,16 @@
 /**
  * Variables used during the game.
  */
+let background;
+let backgroundDos;
 let player;
 let enemy;
 let cursors;
+let spaceBar;
+let bullet = [];
+let frame = -1;
+let contBullet= 0;
+let score = 0;
 
 /**
  * It prelaods all the assets required in the game.
@@ -19,7 +26,8 @@ function preload() {
  */
 function create() {
   // scene background
-  this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "sky");
+  background = this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "sky");
+  backgroundDos = this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - background.height, "sky");
 
   // playet setup
   player = this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT, "player");
@@ -35,12 +43,38 @@ function create() {
 
   //cursors map into game engine
   cursors = this.input.keyboard.createCursorKeys();
+
+  //Score
+
+  this.add.text(5, 5, "Score: " + score);
+  
+
+
+
+  //mapspace key status
+  spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 }
 
 /**
  * Updates each game object of the scene.
  */
 function update() {
+  moveBackground();
+  movePlayer();
+  if (frame<0) {
+    shoot(this);
+  }
+
+  if (contBullet>0) {
+    shotTravel();
+  }  
+  
+
+  frame--
+  
+}
+
+  function movePlayer() {
   if (cursors.left.isDown) {
     let a = player.x - PLAYER_VELOCITY;
     if (a < (player.width/2) * PLAYER_SCALE) {
@@ -64,7 +98,7 @@ function update() {
     player.setY(a)
   }
   else if (cursors.down.isDown) {
-    let PLAYER_VELOCITY2 = PLAYER_VELOCITY*2;
+    let PLAYER_VELOCITY2 = PLAYER_VELOCITY*1.5;
     let a = player.y + PLAYER_VELOCITY2;
     if (a > SCREEN_HEIGHT - (player.height / 2)* PLAYER_SCALE) {
       a = SCREEN_HEIGHT - player.height / 2 * PLAYER_SCALE;
@@ -72,3 +106,36 @@ function update() {
     player.setY(a)
   }
 }
+
+
+function moveBackground () {
+  background.setY(background.y + BACKGROUND_VELOCITY);
+  backgroundDos.setY(backgroundDos.y + BACKGROUND_VELOCITY)
+   if (background.y > background.height + SCREEN_HEIGHT / 2) {
+     background.setY(backgroundDos.y - background.height)
+  }
+  let temporal = background;
+  background = backgroundDos;
+  backgroundDos = temporal;
+  }
+
+
+  function shoot(engine) {
+    if (spaceBar.isDown) {
+      bullet.push
+      (engine.add.ellipse
+        (player.x, player.y - player.height / 2 * PLAYER_SCALE, 10, 20, 0xf5400a));
+        contBullet++;
+        frame = 20;
+    }
+  }
+
+  function shotTravel () {
+    for (let shot of bullet) {
+      shot.setY (shot.y- PROYECTILE_SPEED)
+      if (shot.y < 0-bullet.height/2) {
+        shot.destroy()
+      }
+    }
+  
+  }
