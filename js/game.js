@@ -8,8 +8,7 @@ let enemy;
 let alienCuatro;
 let alienDos;
 let alienTres;
-let enemies = [enemy, alienCuatro, alienDos, alienTres];
-let arrayEnemies= []
+let enemies= [];
 let cursors;
 let spaceBar;
 let bullets = [];
@@ -38,6 +37,7 @@ function preload() {
   this.load.image("red", "assets/particles/red.png");
   this.load.audio("doh", "assets/audio/doh.mp3");
   this.load.audio("resplandor", "assets/audio/resplandor.mp3")
+  this.load.image("thanos", "assets/particles/thanos.png");
 }
 
 /**
@@ -56,11 +56,6 @@ function create() {
 
   // enemy setup
   spawnEnemy(this)
-
-  enemy = this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT, "enemy");
-  enemy.setX((SCREEN_WIDTH - enemy.width * ENEMY_SCALE) / 2);
-  enemy.setY((enemy.height * ENEMY_SCALE) / 2);
-  enemy.setScale(ENEMY_SCALE);
 
   // alienDos = this.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT, "alienDos"),
   // alienDos.setX((SCREEN_WIDTH - alienDos.width * ENEMY_SCALE + alienDos.width)/2),
@@ -106,6 +101,9 @@ function create() {
     gravityY: 0,
     on: false,
   });
+
+  //Spawn
+  spawnEnemy(this)
 }
 
 /**
@@ -180,7 +178,7 @@ function moveBackground () {
       (engine.add.ellipse
         (player.x, player.y - player.height / 2 * PLAYER_SCALE, 10, 20, 0xf5400a));
         contBullets++;
-        frame = 20;
+        frame = 13;
     }
   }
 
@@ -213,29 +211,34 @@ function moveBackground () {
 
   function collider (bala) {
     let index = 0;
-    while (index < arrayEnemies.length) {
-      if ((bala.x >= enemy[index].x - (enemy[index].width * ENEMY_SCALE)/2) &&
-      (bala.x<=enemy[index].x+(enemy[index].width*ENEMY_SCALE)/2)&&
-      (bala.y>=enemy[index].y-(enemy[index].height*ENEMY_SCALE)/2)&&
-      (bala.y<=enemy[index].y+(enemy[index].height*ENEMY_SCALE)/2)) 
+    while (index < enemies.length) {
+      if ((bala.x >= enemies[index].x - (enemies[index].width * ENEMY_SCALE)/2) &&
+      (bala.x<=enemies[index].x+(enemies[index].width*ENEMY_SCALE)/2)&&
+      (bala.y>=enemies[index].y-(enemies[index].height*ENEMY_SCALE)/2)&&
+      (bala.y<=enemies[index].y+(enemies[index].height*ENEMY_SCALE)/2)) 
       {
-        index++
-        spawnEnemy()
   
-      doh.play()
-      //resplandor.play()
-      explosion.setPosition(enemy.x, enemy.y);
+      //doh.play()
+      resplandor.play()
+      explosion.setPosition(enemies[index].x, enemies[index].y);
       explosion.explode();
-      enemy.setX(Math.floor(Math.random()*(SCREEN_WIDTH-enemy.width) + (enemy.width/2)));
+      
       if (contador < 0) {
         
-        collectEnemy(bala, enemy);
+        collectEnemy();
       }
+      enemies[index].destroy();
+      enemies.splice(index, 1);
+      bala.destroy()
       
    }
-    }
-   
+
+   index++
+
+  }
+  
 }
+
 
 function collectEnemy(){
 contador = 1
@@ -256,12 +259,6 @@ function spawnEnemy(engine) {
   enemy.setY((enemy.height * ENEMY_SCALE) / 2);
   enemy.setScale(ENEMY_SCALE);
 
-  /*const alienDos = engine.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT, "alienDos")
-  alienDos.setX((SCREEN_WIDTH - alienDos.width * ENEMY_SCALE) / 2 - alienDos.width * ENEMY_SCALE 
-    + i * alienDos.width * ENEMY_SCALE);
-  alienDos.setY((alienDos.height * ENEMY_SCALE) / 2);
-  alienDos.setScale(ENEMY_SCALE);*/
-
-  arrayEnemies.push(enemy)
+  enemies.push(enemy)
   }
 }
