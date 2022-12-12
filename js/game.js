@@ -1,6 +1,7 @@
 /**
  * Variables used during the game.
  */
+ 
 let background;
 let backgroundDos;
 let player;
@@ -20,7 +21,13 @@ let contador = -1;
 let explosion;
 let doh;
 let resplandor;
+let sephiroth;
+let rage;
+let lose;
 let alienDosX;
+let pausa = false;
+let gameOverText;
+let gameOverDos;
 // const enemyHalfWidth = enemy.width / 2 * ENEMY_SCALE;
 // const enemyHalfHeight = enemy.height / 2 * ENEMY_SCALE;
 
@@ -37,6 +44,9 @@ function preload() {
   this.load.image("red", "assets/particles/red.png");
   this.load.audio("doh", "assets/audio/doh.mp3");
   this.load.audio("resplandor", "assets/audio/resplandor.mp3");
+  this.load.audio("sephiroth", "assets/audio/sephiroth.mp3");
+  this.load.audio("rage", "assets/audio/rage.mp3");
+  this.load.audio("lose", "assets/audio/lose.mp3");
 }
 
 /**
@@ -86,6 +96,10 @@ function create() {
 
   //Sound
 
+  sephiroth = this.sound.add("sephiroth");
+  rage = this.sound.add("rage");
+  lose = this.sound.add('lose');
+  sephiroth.play();
   doh = this.sound.add("doh");
   resplandor = this.sound.add("resplandor");
 
@@ -104,12 +118,36 @@ function create() {
 
   //Spawn
   spawnEnemy(this);
+
+  //GameOver
+
+  gameOverText = this.add.text(400, 300, "GAME OVER", 
+  {fontSize:'64px', fontFamily: 'roboto', fill: '#bfc5cb'})
+  gameOverText.setOrigin(0.5)
+  gameOverText.visible = false
+  
+
+  //FadeOut
+  
+  
+  this.cameras.main.on("camerafadeoutcomplete", function() {
+    this.scene.restart();})
+
+  
+   
+
+  
 }
 
 /**
  * Updates each game object of the scene.
  */
 function update() {
+
+  if (pausa) {
+    return
+  }
+
   moveBackground();
   movePlayer();
   if (frame < 0) {
@@ -121,6 +159,8 @@ function update() {
   }
 
   moveEnemies();
+  colliderDos(this)
+
 
   frame--;
   contador--;
@@ -251,6 +291,19 @@ function spawnEnemy(engine) {
 
     enemies.push(enemy);
   }
+
+  for (let i = -1; i < 6; i++) {
+    const enemy = engine.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT, "alienDos");
+    enemy.setX(
+      (SCREEN_WIDTH/2 - enemy.width * ENEMY_SCALE) / 2 -
+        enemy.width * ENEMY_SCALE +
+        i * enemy.width+2 * ENEMY_SCALE
+    );
+    enemy.setY((enemy.height * ENEMY_SCALE - SCREEN_HEIGHT) / 2);
+    enemy.setScale(ENEMY_SCALE);
+
+    enemies.push(enemy);
+  }
  
 }
 
@@ -260,8 +313,53 @@ function moveEnemies() {
     enemies[i].setY(enemies[i].y + ENEMY_SPEED);
     
   }
- 
-    collider(player)
+  if (enemies.length > 0 && enemies[index].y >=SCREEN_HEIGHT){
+    gameOver();
+    pausa = true
+   }
+    colliderDos(player)
     index++;
+    
   }
 
+
+  function colliderDos(bala) {
+    let index = 0;
+    while (index < enemies.length) {
+      if (
+        bala.x >= enemies[index].x - (enemies[index].width * ENEMY_SCALE) / 2 &&
+        bala.x <= enemies[index].x + (enemies[index].width * ENEMY_SCALE) / 2 &&
+        bala.y >= enemies[index].y - (enemies[index].height * ENEMY_SCALE) / 2 &&
+        bala.y <= enemies[index].y + (enemies[index].height * ENEMY_SCALE) / 2
+      ) {
+
+        
+        doh.play();
+        //resplandor.play()
+        explosion.setPosition(enemies[index].x, enemies[index].y);
+        explosion.explode();
+        gameOver();
+        pausa = true;
+          //bala.cameras.main.fadeOut(1000, 237, 242, 235);
+      
+  
+       
+          if (contador < 0) {
+            collectEnemy();
+          }
+          enemies[index].destroy();
+          enemies.splice(index, 1);
+          ;
+        
+      }
+      
+  
+      index++;
+    }
+  }
+
+  function gameOver() {
+    gameOverText.visible = true;
+    sephiroth.stop();  
+    lose.play();
+  }
