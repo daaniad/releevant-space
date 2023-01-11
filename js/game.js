@@ -17,7 +17,7 @@ let frame = -1;
 let contBullets = 0;
 let score = 0;
 let scoreText;
-let contador = -1;
+let contador = 0;
 let explosion;
 let doh;
 let resplandor;
@@ -28,6 +28,7 @@ let alienDosX;
 let pausa = false;
 let gameOverText;
 let gameOverDos;
+let pauseText;
 // const enemyHalfWidth = enemy.width / 2 * ENEMY_SCALE;
 // const enemyHalfHeight = enemy.height / 2 * ENEMY_SCALE;
 
@@ -105,6 +106,10 @@ function create() {
 
   //mapspace key status
   spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+  this.keys = this.input.keyboard.addKeys({
+    backSpace:  Phaser.Input.Keyboard.KeyCodes.BACKSPACE,
+    a:  Phaser.Input.Keyboard.KeyCodes.A
+});
 
   explosion = this.add.particles("red").createEmitter({
     scale: { min: 0.5, max: 0 },
@@ -125,6 +130,11 @@ function create() {
   {fontSize:'64px', fontFamily: 'roboto', fill: '#bfc5cb'})
   gameOverText.setOrigin(0.5)
   gameOverText.visible = false
+
+  pauseText = this.add.text(400, 300, "PAUSE", 
+  {fontSize:'64px', fontFamily: 'roboto', fill: '#bfc5cb'})
+  pauseText.setOrigin(0.5)
+  pauseText.visible = false
   
 
   //FadeOut
@@ -142,11 +152,17 @@ function create() {
 /**
  * Updates each game object of the scene.
  */
+let playPause = false;
+
 function update() {
 
+if (playPause) {
   if (pausa) {
-    return
+    return;
   }
+}
+
+  
 
   moveBackground();
   movePlayer();
@@ -159,7 +175,18 @@ function update() {
   }
 
   moveEnemies();
-  colliderDos(this)
+  colliderDos(this);
+
+  if (this.keys.backSpace.isDown) {
+    pausa = true
+    pauseText.visible = true
+  } else if (this.keys.a.isDown) {
+    pausa = false
+    pauseText.visible = true
+  }
+
+  
+ 
 
 
   frame--;
@@ -195,6 +222,8 @@ function movePlayer() {
     }
     player.setY(a);
   }
+
+  
 }
 
 function moveBackground() {
@@ -259,7 +288,7 @@ function collider(bala) {
       explosion.explode();
 
      
-        if (contador < 0) {
+        if (contador < 1) {
           collectEnemy();
         }
         enemies[index].destroy();
@@ -276,6 +305,9 @@ function collectEnemy() {
   contador = 1;
   score += 1;
   scoreText.setText("Score:" + score);
+  if (score ===18) {
+      pausa = true
+    }
 }
 
 function spawnEnemy(engine) {
@@ -304,6 +336,19 @@ function spawnEnemy(engine) {
 
     enemies.push(enemy);
   }
+
+  for (let i = -1; i < 5; i++) {
+    const enemy = engine.add.image(SCREEN_WIDTH / 2, SCREEN_HEIGHT, "alienTres");
+    enemy.setX(
+      (SCREEN_WIDTH/2 - enemy.width * ENEMY_SCALE) / 2 -
+        enemy.width * ENEMY_SCALE +
+        i * enemy.width+1 * ENEMY_SCALE
+    );
+    enemy.setY((enemy.height * ENEMY_SCALE - SCREEN_HEIGHT*2) / 2);
+    enemy.setScale(ENEMY_SCALE);
+
+    enemies.push(enemy);
+  }
  
 }
 
@@ -319,6 +364,8 @@ function moveEnemies() {
    }
     colliderDos(player)
     index++;
+
+    
     
   }
 
@@ -362,4 +409,12 @@ function moveEnemies() {
     gameOverText.visible = true;
     sephiroth.stop();  
     lose.play();
+  }
+
+  function play() {
+    playPause = true
+  }
+
+  function pause () {
+    playPause = false
   }
